@@ -46,8 +46,9 @@ sudo docker run hello-world
 
 echo "FROM ubuntu:16.04
 
-RUN apt-get update && apt-get install -y openssh-server vim
+RUN apt-get update && apt-get install -y openssh-server vim locales net-tools
 RUN mkdir /var/run/sshd
+RUN locale-gen fr_FR.UTF-8
 RUN echo 'root:ssgpassword' | chpasswd
 RUN sed -i 's/PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 
@@ -62,8 +63,15 @@ CMD /usr/sbin/sshd -D" > Dockerfile
 
 
 docker build -t ubuntu-ssh .
-docker run -dt --name finalssh ubuntu-ssh  
+
+docker run -dt --restart=always --name server1 ubuntu-ssh
+docker run -dt --restart=always --name server2 ubuntu-ssh
+docker run -dt --restart=always --name server3 ubuntu-ssh
+docker run -dt --restart=always --name server4 ubuntu-ssh
 
 docker network create --subnet 192.168.1.0/24 ssg-dc-vnet 
-docker network connect --ip 192.168.1.2  ssg-dc-vnet finalssh
+docker network connect --ip 192.168.1.2  ssg-dc-vnet server1
+docker network connect --ip 192.168.1.3  ssg-dc-vnet server2
+docker network connect --ip 192.168.1.4  ssg-dc-vnet server3
+docker network connect --ip 192.168.1.5  ssg-dc-vnet server4
 
